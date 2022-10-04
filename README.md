@@ -74,4 +74,4 @@ snow remove
 snow help
 snow (same as snow build)
 ```
-[An example can be found here to show usage]()
+### [An example can be found here to show usage](https://github.com/ImpishDeathTech/SnowLynx/tree/master/example)
