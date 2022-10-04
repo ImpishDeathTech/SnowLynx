@@ -60,7 +60,7 @@ snow is used from command line like so
 
 the optional values can be used to choose a specific .snowrc and .snowtab
 
-`snow build @ data/snowtab $ data/snowrc`
+`snow build @ data/.snowtab $ data/.snowrc`
 
 `@` for .snowtab
 
