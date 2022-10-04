@@ -11,21 +11,21 @@
 
 local Object = require('snowlynx.nclassic')
 
-local SnowTab = Object:extend('SnowTab')
+local SnowTab = Object:extend('snowtab')
 
 function SnowTab:new(tab, ...)
     self.mode          = 'executable'
     self.libname       = ''
     self.submode       = ''
-    self.bin           = '/usr/bin'
+    self.bin           = 'bin'
     self.object        = 'snow.out'
     self.platform      = 'unix'
     self.subplatform   = 'linux'
     self.architechture = 'x86_64'
     self.compiler      = 'g++'
     self.stdlib        = 'c++20'
-    self.lib           = './lib'
-    self.include       = './include'
+    self.lib           = 'lib'
+    self.include       = 'include'
     self.link          = {}
     self.src           = {}
     self.obj           = {}
@@ -54,11 +54,11 @@ function SnowTab:cmp()
             snow.printf("SnowLynx: Compiling %s for %s-%s", self.object, string.upper(self.platform), self.architechture)
         end
 
-        output = string.format("%s -std=%s -I%s %s ", self.compiler, self.stdlib, self.cflags, self.include)
+        output = string.format("%s -std=%s -I%s %s ", self.compiler, self.stdlib, self.include, self.cflags)
     
     elseif string.lower(self.platform) == 'win32' then
         snow.printf("SnowLynx: Compiling %s for %s-%s", self.object, string.upper(self.platform), self.architechture)
-        output = string.format("%s -std=% -I%s %s ", self.compiler, self.stdlib, self.cflags, self.include)
+        output = string.format("%s -std=% -I%s %s ", self.compiler, self.stdlib, self.include, self.cflags)
     
     else 
         error("platform '"..self.platform.." is unrecognized")
@@ -86,7 +86,7 @@ function SnowTab:exe()
             snow.printf("SnowLynx: Building %s for %s-%s", self.object, string.upper(self.platform), self.architechture)
         end
 
-        output = string.format("%s -std=%s -I%s %s %s ", self.compiler, self.stdlib, self.inculde, self.lflags, self.object)
+        output = string.format("%s -std=%s -I%s -L%s %s %s ", self.compiler, self.stdlib, self.inculde, self.lib, self.lflags, self.object)
     
     elseif string.lower(self.platform) == 'win32' then
         snow.printf("SnowLynx: Building %s for %s-%s", self.object, string.upper(self.platform), self.architechture)
@@ -125,11 +125,11 @@ function SnowTab:pic()
             snow.printf("SnowLynx: Building project independant code for %s-%s", string.upper(self.platform), self.architechture)
         end
         
-        output = string.format("%s -std=%s -fpic -I%s %s ", self.compiler, self.stdlib, self.cflags, self.include)
+        output = string.format("%s -std=%s -fpic -I%s %s ", self.compiler, self.stdlib, self.include, self.cflags)
     
     elseif self.platform == 'win32' then
         snow.printf("SnowLynx: Building project independant code for %s-%S", string.upper(self.platform), self.architechture)
-        output = string.format("%s -std=% -fpic -I%s %s ", self.compiler, self.stdlib, self.cflags, self.include)
+        output = string.format("%s -std=% -fpic -I%s %s ", self.compiler, self.stdlib, self.include, self.cflags)
     else 
         error("platform '"..self.platform.." is unrecognized")
     end
