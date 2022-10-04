@@ -13,7 +13,7 @@ local Object = require('snowlynx.nclassic')
 local snow = Object:extend()
 
 function snow.version()
-    return '1.3'
+    return '1.4'
 end
 
 function snow.isrelease()
@@ -66,6 +66,12 @@ end
 
 function snow.printf(fmt, ...)
     print(string.format(fmt, ...))
+end
+
+function snow.help()
+    snow.printf("SnowLynx-%s Help", snow.version())
+    snow.printf("snow [command] [@ .snowtab] [$ .snowrc]")
+    snow.printf("\tsnow build\n\tsnow install\n\tsnow remove\n\tsnow (same as snow build)")
 end
 
 function snow.build(snowtab)
