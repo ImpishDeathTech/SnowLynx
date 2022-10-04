@@ -1,6 +1,13 @@
 --
 -- .snowrc
 --
+-- BSD 3-Clause License
+--
+-- Copyright (c) 2022, Christopher Stephen Rafuse
+-- All rights reserved.
+--
+-- See LICENSE for details
+--
 -- this is the configuration file for snowlynx, you can do anything here, it is loaded at the beginning of the program
 -- add any custom commands and modes here. everything is written in lua. You could also write these in the snowtab, but
 -- that is not my convention. .snowtab is for snowtabs, .snowrc is for commands and modes
