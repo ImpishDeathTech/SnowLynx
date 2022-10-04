@@ -1,9 +1,38 @@
-return snow.Tab({
-    mode    = m.exe,
-    src     = 'example/test.cxx',
+--
+-- example/.snowtab
+--
+-- BSD 3-Clause License
+--
+-- Copyright (c) 2022, Christopher Stephen Rafuse
+-- All rights reserved.
+--
+-- See LICENSE for details
+--
+
+-- executable should be done last
+local tab = snow.Tab({
+    mode    = snow.exe,
+    object  = 'test.out',
+    include = './include',
+    lib     = './lib',
+    src     = 'test.cxx',
     link    = {
-        'sfml-system',
-        'sfml-window',
-        'sfml-graphics'
+        'testlib'
     }
-})
+},
+-- make sure to do them in order
+snow.Tab({
+    mode    = 'build',
+    submode = snow.pic,
+    include = 'include',
+    src     = 'src/testlib.cxx',
+}),
+snow.Tab({
+    mode    = 'build',
+    submode = snow.shared,
+    include = 'include',
+    object  = 'testlib',
+    obj     = 'testlib.o'
+}))
+
+return tab
