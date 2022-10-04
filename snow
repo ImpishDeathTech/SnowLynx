@@ -71,7 +71,7 @@ e      = false
 
 if checkrc(SNOW_RC) then
     snowrc, e = loadfile(SNOW_RC)
-elseif checkrc(HOME..'/.config/snowrc')
+elseif checkrc(HOME..'/.config/snowrc') then
     snowrc, e = loadfile(HOME..'/.config/snowrc')
 elseif checkrc(SNOW_DEFRC) then
     snowrc, e = loadfile(SNOW_DEFRC)
