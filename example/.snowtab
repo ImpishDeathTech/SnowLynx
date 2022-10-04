@@ -22,13 +22,13 @@ local tab = snow.Tab({
 },
 -- make sure to do them in order
 snow.Tab({
-    mode    = 'build',
+    mode    = snow.build,
     submode = snow.pic,
     include = 'include',
     src     = 'src/testlib.cxx',
 }),
 snow.Tab({
-    mode    = 'build',
+    mode    = snow.build,
     submode = snow.shared,
     include = 'include',
     object  = 'testlib',
