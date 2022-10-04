@@ -1,3 +1,14 @@
+--
+-- snowfunc.lua
+--
+-- BSD 3-Clause License
+--
+-- Copyright (c) 2022, Christopher Stephen Rafuse
+-- All rights reserved.
+--
+-- See LICENSE for details
+--
+
 local Object = require('snowlynx.nclassic')
 local snow = Object:extend()
 
