@@ -1,0 +1,147 @@
+#! /usr/bin/lua5.4
+
+require 'snowlynx'
+
+-- set defaults:
+--      1. look for a local snowtab file
+--      2. set base mode to build
+--      3. set default snowrc to local directory
+--      4. for unix, default snowrc is also in /usr/share/snowlynx
+SNOW_TAB   = './.snowtab'
+SNOW_MODE  = 'build'
+SNOW_RC    = './.snowrc'
+SNOW_DEFRC = '/usr/share/snowlynx/.snowrc'
+
+-- iterate through command line arguments
+-- to get desired information
+function loadargs()
+    local i = 1
+
+    if #arg >= 1 then
+        if arg[1] == 'help' then
+            snow.help()
+            os.exit(0)
+        else
+            SNOW_MODE = arg[1]
+        end
+    end
+
+    i = i + 1
+
+    while i <= #arg do
+        if arg[i] == '@' then
+            i = i + 1
+            SNOW_TAB = arg[i]
+        elseif arg[i] == '$' then
+            i = i + 1
+            SNOW_RC = arg[i]
+        else
+            SNOW_MODE = arg[i]
+        end
+        i = i + 1
+    end
+end
+
+-- check the snowrc to make sure it exists
+-- if it doesn't, snow might not be able to run
+function checkrc(path)
+    local f = io.open(path, 'r')
+    if not f then 
+        return false
+    else
+        f:close()
+        return true
+    end
+end
+
+-- load cli arguments and run configuration
+-- if it can't find the specified rc or a local rc
+-- it will load the default rc in /usr/share/snowlynx
+-- fuck off at any errors
+loadargs()
+
+snowrc = false
+e      = false
+
+if checkrc(SNOW_RC) then
+    snowrc, e = loadfile(SNOW_RC)
+elseif checkrc(SNOW_DEFRC) then
+    snowrc, e = loadfile(SNOW_DEFRC)
+end
+
+if e then
+    error(e)
+end
+
+flag   = false
+e      = false
+
+flag, e = pcall(snowrc)
+
+if not flag then
+    error(e)
+end
+
+-- once the run configuration is loaded, print the watermark, and load the given snowtab
+-- the program will fuck off on an error if it fails to load this table
+snow.printf('SnowLynx-%s Build System, Copyright (c) Christopher Stephen Rafuse 2022, BSD 3-Clause', snow.version())
+
+input, e = loadfile(SNOW_TAB)
+
+if not input or type(input) ~= 'function' then
+    error(e) 
+else
+    local snowtab = false
+    flag, snowtab = pcall(input)
+    
+    if flag then
+        -- if it is a marked multitab, find the snowtab
+        -- with the marked command as it's mode, do the command
+        -- and exit from there
+        if snowtab.mode == m.multi then
+            for _, v in pairs(snowtab.subtabs) do
+                if v.mode == SNOW_MODE then
+                    v.mode = v.submode 
+                    os.exit(snow[SNOW_MODE](v))
+                end
+            end
+        -- else, if there are subtabs, do them first,
+        -- then, do the main snowtab and exit from there
+        elseif #snowtab.subtabs > 0 then
+            local retVal = false
+
+            for _, tab in pairs(snowtab.subtabs) do
+                retVal = snow[tab.mode]
+
+                if type(retVal) ~= 'function' then
+                    error(tab.mode..' is not a valid mode')
+                else
+                    tab.mode = tab.submode
+                    retVal(tab)
+                end
+            end
+            
+            retVal = snow[SNOW_MODE]
+            
+            if type(retVal) ~= 'function' then
+                error(SNOW_MODE..' is not a valid mode')
+            else
+                os.exit(retVal(snowtab))
+            end
+        -- else, just do the snow tab and exit from there
+        -- any further errors will be reported
+        else
+            local retVal = snow[SNOW_MODE]
+
+            if type(retVal) ~= 'function' then
+                error(SNOW_MODE..' is not a valid mode')
+            else
+                os.exit(retVal(snowtab))
+            end
+        end
+    -- if the snowtab load does fail, the snow tab will be an error object
+    -- so report that error
+    else
+        error(snowtab)
+    end
+end

@@ -1,0 +1,39 @@
+--
+-- .snowrc
+--
+-- this is the configuration file for snowlynx, you can do anything here, it is loaded at the beginning of the program
+-- add any custom commands and modes here. everything is written in lua. You could also write these in the snowtab, but
+-- that is not my convention. .snowtab is for snowtabs, .snowrc is for commands and modes
+-- mode should be done as
+--
+-- commands should be written as
+--
+-- function snow.commandname(snowtab)
+--      code
+-- end
+--
+-- modes should be written as
+--
+-- function snow.Tab:modename()
+--      code
+-- end
+--
+
+function snow.Tab:custom()
+    local output = string.format("%s ", self.compiler)
+
+    for _, k in pairs(self.order) do
+        if type(self[k]) == 'string' then
+            output = output..self[k]..' '
+
+        elseif type(self[k]) == 'table' then
+            for _, v in pairs(self[k]) do
+                output = output..v..' '
+            end
+        end
+    end
+
+    os.execute(output)
+end
+
+snow.opt = 'custom'
