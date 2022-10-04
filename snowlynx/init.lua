@@ -13,9 +13,12 @@ snow        = require('snowlynx.snowfunc')
 snow.Tab    = require('snowlynx.snowtab')
 snow.Object = require('snowlynx.nclassic')
 
-m = {}
-m.exe    = 'exe'
-m.pic    = 'pic'
-m.shared = 'shared'
-m.cmp    = 'cmp'
-m.multi  = 'multiple'
+snow.exe     = 'exe'
+snow.pic     = 'pic'
+snow.shared  = 'shared'
+snow.cmp     = 'cmp'
+snow.multi   = 'multiple'
+snow.build   = 'build'
+snow.install = 'install'
+snow.remove  = 'remove'
+
