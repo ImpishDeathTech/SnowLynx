@@ -1,0 +1,9 @@
+return snow.Tab({
+    mode    = m.exe,
+    src     = 'example/test.cxx',
+    link    = {
+        'sfml-system',
+        'sfml-window',
+        'sfml-graphics'
+    }
+})
