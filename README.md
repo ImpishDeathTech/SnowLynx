@@ -8,7 +8,7 @@ for now, it is written completely in lua, but may be rewritten in c++ depending 
 in comparison
 
 ## .snowrc and .snowtab
-### A .snowrc looks something like [this]()
+### A .snowrc looks something like [this](https://github.com/ImpishDeathTech/SnowLynx/blob/master/.snowrc)
 
 use it to create new global variables, commands and modes like so
 ```lua
