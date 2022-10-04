@@ -16,6 +16,10 @@ function snow.version()
     return '1.3'
 end
 
+function snow.isrelease()
+    return false
+end
+
 function snow.cp(target, destination, recursive)
     recursive = recursive or false
 
