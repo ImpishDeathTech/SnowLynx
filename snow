@@ -1,16 +1,5 @@
 #! /usr/bin/lua5.4
 
---
--- snow
---
--- BSD 3-Clause License
---
--- Copyright (c) 2022, Christopher Stephen Rafuse
--- All rights reserved.
---
--- See LICENSE for details
---
-
 require 'snowlynx'
 
 -- set defaults:
@@ -22,6 +11,12 @@ SNOW_TAB   = './.snowtab'
 SNOW_MODE  = 'build'
 SNOW_RC    = './.snowrc'
 SNOW_DEFRC = '/usr/share/snowlynx/.snowrc'
+
+os.execute("echo $HOME > tmp")
+f = io.open('tmp','r')
+HOME = f:read('a')
+f:close()
+
 
 -- iterate through command line arguments
 -- to get desired information
@@ -76,11 +71,13 @@ e      = false
 
 if checkrc(SNOW_RC) then
     snowrc, e = loadfile(SNOW_RC)
+elseif checkrc(HOME..'/.config/snowrc')
+    snowrc, e = loadfile(HOME..'/.config/snowrc')
 elseif checkrc(SNOW_DEFRC) then
     snowrc, e = loadfile(SNOW_DEFRC)
 end
 
-if e then
+if not snowrc then
     error(e)
 end
 
@@ -109,7 +106,7 @@ else
         -- if it is a marked multitab, find the snowtab
         -- with the marked command as it's mode, do the command
         -- and exit from there
-        if snowtab.mode == m.multi then
+        if snowtab.mode == snow.multi then
             for _, v in pairs(snowtab.subtabs) do
                 if v.mode == SNOW_MODE then
                     v.mode = v.submode 
