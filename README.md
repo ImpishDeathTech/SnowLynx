@@ -74,4 +74,13 @@ snow remove
 snow help
 snow (same as snow build)
 ```
+
+### Default Mode List
+```lua
+snow.exe
+snow.cmp
+snow.pic
+snow.shared
+snow.multi
+```
 ### [An example can be found here to show usage](https://github.com/ImpishDeathTech/SnowLynx/tree/master/example)
