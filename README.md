@@ -23,7 +23,7 @@ function snow.Tab:modename()
 end
 ```
 
-### A .snowtab looks something like [this]()
+### A .snowtab looks something like [this](https://github.com/ImpishDeathTech/SnowLynx/blob/master/example/.snowtab)
 It is where we define our build table
 
 Several options are available by default:
