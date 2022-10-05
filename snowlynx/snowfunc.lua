@@ -20,6 +20,45 @@ function snow.isrelease()
     return false
 end
 
+snow.HelpTab = Object:extend("HelpTab")
+
+function snow.HelpTab:add(name, proc) 
+    self[name] = proc; 
+end
+
+function snow.HelpTab:build()
+    print("\tsnow build: builds a project based on the local snowtab, or a given .snowtab")
+end
+
+function snow.HelpTab:install()
+    print("\tsnow install: installs a project to the standard directories")
+end
+
+function snow.HelpTab:remove()
+    print("\tsnow remove: removes a project from the standard directories")
+end
+
+function snow.HelpTab:help()
+    print("\tsnow help [option]: prints a standard help message, or the description of the given command")
+end
+
+function snow.help(opt)
+    opt = opt or false
+    if not opt then
+        snow.printf("SnowLynx-%s Help", snow.version())
+        snow.printf("snow [command] [@ .snowtab] [$ .snowrc]")
+        snow.printf("\tsnow build\n\tsnow install\n\tsnow remove\n\tsnow help [option] snow (same as snow build)")
+    else
+        snowexec = snow.HelpTab[opt]
+
+        if snowexec ~= nil and type(snowexec) == 'function' then
+            snowexec(HelpTab)
+        else
+            error(string.format('%s not in helptab'))
+        end
+    end
+end
+
 function snow.cp(target, destination, recursive)
     recursive = recursive or false
 
@@ -66,12 +105,6 @@ end
 
 function snow.printf(fmt, ...)
     print(string.format(fmt, ...))
-end
-
-function snow.help()
-    snow.printf("SnowLynx-%s Help", snow.version())
-    snow.printf("snow [command] [@ .snowtab] [$ .snowrc]")
-    snow.printf("\tsnow build\n\tsnow install\n\tsnow remove\n\tsnow (same as snow build)")
 end
 
 function snow.build(snowtab)
