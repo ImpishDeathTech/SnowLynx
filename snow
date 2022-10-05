@@ -36,7 +36,12 @@ function loadargs()
 
     if #arg >= 1 then
         if arg[1] == 'help' then
-            snow.help()
+            if #arg == 2 then
+                snow.help(arg[2])
+            else
+                snow.help()
+            end
+            
             os.exit(0)
         else
             SNOW_MODE = arg[1]
