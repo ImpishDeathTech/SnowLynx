@@ -1,5 +1,17 @@
+--
+-- example/.snowtab
+--
+-- BSD 3-Clause License
+--
+-- Copyright (c) 2022, Christopher Stephen Rafuse
+-- All rights reserved.
+--
+-- See LICENSE for details
+--
 -- example of added command
 -- this can now be called as 'snow clean' from command line
+--
+
 function snow.clean(snowtab)
     snow.rm(snowtab.lib..'/*')
     snow.rm('./*.o')
