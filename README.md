@@ -71,7 +71,7 @@ the optional values can be used to choose a specific .snowrc and .snowtab
 snow build
 snow install
 snow remove
-snow help
+snow help [option]
 snow (same as snow build)
 ```
 
