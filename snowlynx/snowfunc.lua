@@ -1,14 +1,3 @@
---
--- snowfunc.lua
---
--- BSD 3-Clause License
---
--- Copyright (c) 2022, Christopher Stephen Rafuse
--- All rights reserved.
---
--- See LICENSE for details
---
-
 local Object = require('snowlynx.nclassic')
 local snow = Object:extend()
 
@@ -41,6 +30,16 @@ end
 function snow.HelpTab:help()
     print("\tsnow help [option]: prints a standard help message, or the description of the given command")
 end
+
+snow.HelpTab['snow.exe'] = function (self) print(self.descreption['snow.exe']); end
+
+snow.HelpTab['snow.cmp'] = function (self) print(self.description['snow.cmp']); end
+
+snow.HelpTab['snow.pic'] = function (self) print(self.description['snow.pic']); end
+
+snow.HelpTab['snow.shared'] = function (self) print(self.description['snow.shared']); end
+
+snow.HelpTab['snow.multi'] = function (self) print(self.description['snow.multi']); end
 
 function snow.help(opt)
     opt = opt or false
@@ -85,7 +84,7 @@ function snow.rm(target, recursive)
     if recursive then
         return os.execute(string.format('sudo rm -r %s', target))
     else
-        return os.execute(stirng.format('sudo rm %s', target))
+        return os.execute(string.format('sudo rm %s', target))
     end
 end
 

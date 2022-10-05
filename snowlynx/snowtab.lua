@@ -1,17 +1,6 @@
---
--- snowtab.lua
---
--- BSD 3-Clause License
---
--- Copyright (c) 2022, Christopher Stephen Rafuse
--- All rights reserved.
---
--- See LICENSE for details
---
-
 local Object = require('snowlynx.nclassic')
 
-local SnowTab = Object:extend('snowtab')
+local SnowTab = Object:extend('SnowTab')
 
 function SnowTab:new(tab, ...)
     self.mode          = 'executable'
