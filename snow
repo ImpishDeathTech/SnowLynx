@@ -16,6 +16,7 @@ os.execute("echo $HOME > tmp")
 f = io.open('tmp','r')
 HOME = f:read('a')
 f:close()
+snow.rm('tmp')
 
 
 -- iterate through command line arguments
