@@ -1,9 +1,9 @@
 
-NAME  = snowlynx
-SHARE = /usr/share/$(NAME)
-LIB   = /usr/lib/lua/5.4/$(NAME)
-OBJ   = snow
-BIN   = /usr/bin/snow
+NAME   = snowlynx
+SHARE  = /usr/share/$(NAME)
+LIB    = /usr/lib/lua/5.4/$(NAME)
+OBJ    = snow
+BIN    = /usr/bin/snow
 
 install:
 	@echo Installing $(NAME) '>,..,>'
