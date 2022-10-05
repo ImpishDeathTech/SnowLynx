@@ -28,7 +28,7 @@ It is where we define our build table
 
 Several options are available by default:
 ```lua
-function SnowTab:new(tab, ...)
+function snow.Tab:new(tab, ...)
     self.mode          = 'executable'
     self.libname       = ''
     self.submode       = ''
