@@ -1,0 +1,5 @@
+function snow.clean(snowtab)
+    snow.rm(snowtab.lib..'/*')
+    snow.rm('./*.o')
+    snow.rm('./test.out')
+end
