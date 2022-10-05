@@ -6,10 +6,11 @@
 -- 
 -- based on https://github.com/rxi/classic
 -- 
+-- Copyright (c) 2022, ImpishDeathTech
 -- Copyright (c) 2014, rxi
 --
 -- This module is free software; you can redistribute it and/or modify it under
--- the terms of the MIT license. See LICENSE for details.
+-- the terms of the MIT license.
 --
 
 local Object = {}
@@ -75,9 +76,7 @@ end
 function Object:metatable(...)
   for _, cls in pairs({...}) do
     for k, v in pairs(cls) do
-      if k ~= '__gc' and k ~= '__call' then 
-        getmetatable(self)[k] = v
-      end
+      getmetatable(self)[k] = v
     end
   end
   return getmetatable(self)
