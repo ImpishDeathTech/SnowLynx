@@ -10,29 +10,29 @@
 --
 
 -- executable should be done last
-local tab = snow.Tab({
-    mode    = snow.exe,
-    object  = 'test.out',
-    include = './include',
-    lib     = './lib',
-    src     = 'test.cxx',
-    link    = {
-        'testlib'
-    }
-},
+local tab = snow.Tab({ mode = snow.cmd.multi },
 -- make sure to do them in order
 snow.Tab({
-    mode    = 'build',
+    mode    = snow.cmd.build,
     submode = snow.pic,
     include = 'include',
-    src     = 'src/testlib.cxx',
+    src     = { 'src/testlib.cxx' },
 }),
 snow.Tab({
-    mode    = 'build',
+    mode    = snow.cmd.build,
     submode = snow.shared,
     include = 'include',
     object  = 'testlib',
-    obj     = 'testlib.o'
+    obj     = { 'testlib.o' }
+}),
+snow.Tab({
+    mode    = snow.cmd.build,
+    submode = snow.exe,
+    object  = 'test.out',
+    include = './include',
+    lib     = './lib',
+    src     = { 'test.cxx' },
+    link    = { '-ltestlib' }
 }))
 
 return tab
