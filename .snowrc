@@ -19,21 +19,9 @@
 -- end
 --
 
+
 function snow.Tab:custom()
-    local output = string.format("%s ", self.compiler)
-
-    for _, k in pairs(self.order) do
-        if type(self[k]) == 'string' then
-            output = output..self[k]..' '
-
-        elseif type(self[k]) == 'table' then
-            for _, v in pairs(self[k]) do
-                output = output..v..' '
-            end
-        end
-    end
-
-    os.execute(output)
+    return snow[self.compiler](self.order())
 end
 
 snow.opt = 'custom'

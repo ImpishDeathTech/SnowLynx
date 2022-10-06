@@ -10,15 +10,8 @@ install:
 	@sudo mkdir $(SHARE)
 	@sudo cp -r ./* $(SHARE)/
 
-	@echo Installing $(LIB) module '>,..,>'
-	@sudo mkdir $(LIB)
-	@sudo cp ./$(NAME)/* $(LIB)
-	
-	@echo Installing $(BIN) '>,..,>'
-	@chmod +x ./$(OBJ)
-	@sudo cp ./$(OBJ) $(BIN)
-
-	@echo Done '^,..,^'
+	@chmod +x snow
+	@./snow install
 
 remove:
 	@echo Removing $(NAME) build system '>,..,>'

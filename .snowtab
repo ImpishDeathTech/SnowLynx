@@ -1,0 +1,19 @@
+--
+-- .snowtab
+--
+
+local tab = snow.Multi(
+        snow.Tab({
+            mode         = snow.cmd.install,
+            submode      = snow.inc,
+            include      = '/usr/lib/lua/5.4/snowlynx',
+            target       = 'snowlynx/*.lua'
+        }),
+        snow.Tab({
+            mode        = snow.cmd.install,
+            submode     = snow.bin,
+            destination = '/usr/bin/snow',
+            target      = 'snow'
+        }))
+
+return tab
