@@ -13,7 +13,7 @@ local Object = require('snowlynx.nclassic')
 local SnowTab = Object:extend('SnowTab')
 
 function SnowTab:new(tab, ...)
-    self.mode          = 'executable'
+    self.mode          = 'build'
     self.libname       = ''
     self.submode       = ''
     self.bin           = 'bin'
@@ -43,57 +43,49 @@ function SnowTab:printfields()
     end
 end
 
+function SnowTab:order()
+    return { 
+        string.format("-std=%s", self.stdlib), 
+        string.format("-I%s", self.include),
+        string.format('-L%s', self.lib),
+        self.cflags,
+        self.src
+    }
+end
+
 function SnowTab:cmp()
     local output = ''
+    for k, _ in pairs(snow.compilers) do
+        if self.compiler == k then
+            local flag = false 
+            local e    = false
 
-    if string.lower(self.platform) == 'unix' then
-        output = string.format("%s -std=%s -I%s %s ", self.compiler, self.stdlib, self.include, self.cflags)
-    
-    elseif string.lower(self.platform) == 'win32' then
-        output = string.format("%s -std=% -I%s %s ", self.compiler, self.stdlib, self.include, self.cflags)
-    
-    else 
-        error("platform '"..self.platform.." is unrecognized")
-    end
+            flag, e = pcall(snow[k], self:order())
 
-    if type(self.src) == 'string' then 
-        output = output..self.src..' '
+            if not flag then
+                error(e, 2)
+            end
 
-    elseif type(self.src) == 'table' then 
-        for _, o in pairs(self.src) do 
-            output = output..o..' '
+            return e
         end
     end
 
-    return os.execute(output)
+    error(self.compiler..' not supported', 2)
 end
 
 function SnowTab:exe()
     local output = ''
     
     if string.lower(self.platform) == 'unix' then
-        output = string.format("%s -std=%s -I%s -L%s %s %s ", self.compiler, self.stdlib, self.inculde, self.lib, self.lflags, self.object)
+        output = string.format("-std=%s -I%s -L%s %s %s ", self.stdlib, self.inculde, self.lib, self.lflags, self.object)
     
     elseif string.lower(self.platform) == 'win32' then
-        output = string.format("%s.exe -std=%s -I%s %s %s.exe ", self.compiler, self.stdlib, self.include, self.lflags, self.object)
+        output = string.format("-std=%s -I%s %s %s.exe ", self.stdlib, self.include, self.lflags, self.object)
     else
         error("platform '"..self.platform.."' is unrecognized")
     end
 
-    if type(self.src) == 'string' then 
-        output = output..self.src..' '
-
-    elseif type(self.src) == 'table' then 
-        for _, o in pairs(self.src) do 
-            output = output..o..' '
-        end
-    end
-
-    for _, o in pairs(self.link) do
-        output = output..'-l'..o..' '
-    end
-
-    return os.execute(output)
+    return snow[self.compiler](output, self.src, self.link)
 end
 
 SnowTab.bin = SnowTab.exe

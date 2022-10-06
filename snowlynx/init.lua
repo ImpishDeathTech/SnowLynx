@@ -52,5 +52,6 @@ snow.inc    = 'inc'
 snow.cmd    = {
     install = 'install',
     remove  = 'remove',
-    build   = 'build'
+    build   = 'build',
+    multi   = 'multiple'
 }

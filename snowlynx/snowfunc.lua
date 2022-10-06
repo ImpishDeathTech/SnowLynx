@@ -12,16 +12,17 @@
 local Object = require('snowlynx.nclassic')
 local snow = Object:extend()
 
+-- SnowLynx version
 function snow.major()
     return 1
 end
 
 function snow.minor()
-    return 4
+    return 5
 end
 
 function snow.patch()
-    return 5
+    return 0
 end
 
 function snow.isrelease()
@@ -65,21 +66,42 @@ function snow.version(fmt)
     end
 end
 
+-- watermark printed at beginning of snow program
 function snow.watermark()
-    return string.format("SnowLynx Build System ver%s, Copyright (c) Christopher Stephen Rafuse 2022, BSD 3-Clause All rights reserved", snow.version('string'))
+    local testing = ' (TESTING)'
+
+    if snow.isrelease() then
+        testing = ''
+    end
+
+    return string.format("SnowLynx Build System ver%s%s, Copyright (c) Christopher Stephen Rafuse 2022, BSD 3-Clause All rights reserved", snow.version('string'), testing)
 end
 
+-- some format strings
 snow.errfmt  = 'SnowLynx: !ERROR! %s x,..,X\n'
 snow.errfmt2 = 'SnowLynx: %s: !ERROR! %s x,..,X\n'
 snow.badarg  = "badargument #%d to '%s' (%s expected, got %s)\n"
 snow.badarg2 = "badargument #%d to '%s' (%s expected)\n"
+
+-- some characters
 snow.newline = '\n'
 snow.tabchar = '\t'
 
+-- error format function that prints to stderr
+-- @param fmt should be a format string
+-- used by snow.error
 function snow.errorf(fmt, ...)
-    io.stderr:write(string.format(fmt, ...))
+    if type(fmt) == 'string' then
+        io.stderr:write(string.format(fmt, ...))
+    else
+        error(string.format(snow.badarg, 1, "errorf", 'string', type(fmt)), 2)
+    end
 end
 
+-- error function used by snow program
+-- @param e should be an error object
+-- @param exit should be a boolean or no value
+-- @param code should be a number or no value
 function snow.error(e, exit, code)
     exit = exit or false
     code = code or 1
@@ -89,10 +111,19 @@ function snow.error(e, exit, code)
     end
 end
 
-snow.HelpTab = Object:extend("HelpTab")
+function snow.badargument(num, proc, expected, got)
+    return string.format(snow.badarg, num, proc, expected, got)
+end
+
+-- a table contaning the functions that print the 
+-- descriptions of different commands
+-- these can be added in .snowrc along side 
+-- their respective command functions to
+-- snow table
+snow.HelpTab = {}
 
 function snow.HelpTab:build()
-    print("\tsnow build: builds a project based on the local snowtab, or a given .snowtab")
+    print("\tsnow build: builds a project based on the local .snowtab, or a given .snowtab")
 end
 
 function snow.HelpTab:install()
@@ -103,18 +134,58 @@ function snow.HelpTab:remove()
     print("\tsnow remove: removes a project from the standard directories")
 end
 
+function snow.HelpTab:multiple()
+    print("\tsnow multiple: builds a project based on the local multitab .snowtab, or a given multitab .snowtab")
+end
+
 function snow.HelpTab:help()
     print("\tsnow help [option]: prints a standard help message, or the description of the given command")
 end
 
+-- entry object for adding command entries
+-- to snow from .snowrc
+snow.Entry   = Object:extend("SnowEntry")
+
+function snow.Entry:new(name, proc, command)
+    if type(name) == 'string' then
+        self.name = name
+    else
+        error(snow.badargument(1, 'new', 'string', type(name)), 2)
+    end
+
+    if type(proc) == 'function' then
+        self.proc = proc
+    else
+        error(snow.badargument(2, 'new', 'function', type(proc)), 2)
+    end
+
+    if type(command) == 'function' then
+        self.command = command
+    else
+        error(snow.badargument(3, 'new', 'function', type(command)), 2)
+    end
+end
+
+-- function for adding help entries
+-- @param entry should be of type Entry, found in snow.Entry
+function snow.add(entry)
+    if Object.is(entry, snow.Entry) then
+        snow.HelpTab[entry.name] = entry.proc
+        snow[entry.name]         = entry.command
+    else
+        error(snow.badargument(1, 'add', 'Entry', tostring(entry)), 2)
+    end
+end
+
 -- help output
+-- @param opt should be a string contained as a key within the HelpTab
 function snow.help(opt)
     if not opt then
-        snow.printf("SnowLynx-%s Help", snow.version())
-        snow.printf("snow [command] [@ .snowtab] [$ .snowrc]")
+        snow.printf("SnowLynx-%s Help\n", snow.version())
+        snow.printf("snow [command] [@ .snowtab] [$ .snowrc]\n")
         
         for k, _ in pairs(snow.HelpTab) do
-            snow.printf('\tsnow %s', k)
+            snow.printf('\tsnow %s\n', k)    
         end
     else
         local flag     = false
@@ -128,14 +199,25 @@ function snow.help(opt)
                 snow.error(e, true)
             end
         else
-            snow.error(string.format('%s not in snow.HelpTab', opt), true)
+            error(string.format('%s not a snow.HelpTab option', opt), 2)
         end
     end
 end
 
 -- copy given target to given destination
+-- @param target should be the path of the target
+-- @param destination should be the path of the destination of the copy
+-- @param recusive should be a boolean indicating wether or not to use -r
 function snow.cp(target, destination, recursive)
     recursive = recursive or false
+    
+    if type(target) ~= 'string' then
+        error(snow.badargument(1, 'cp', 'string', type(target)), 2)
+    elseif type(destination) ~= 'string' then
+        error(snow.badargument(2, 'cp', 'string', type(destination)), 2)
+    elseif type(recursive) ~= 'boolean' then
+        error(snow.badargument(3, 'cp', 'boolean or no value', type(destination)), 2)
+    end
 
     if recursive then 
         return os.execute(string.format('sudo cp -r %s %s', target, destination))
@@ -145,8 +227,20 @@ function snow.cp(target, destination, recursive)
 end
 
 -- move given target to given destination
+-- @param target should be the path of the target
+-- @param destination should be the path of the destination of the copy
+-- @param recusive should be a boolean indicating wether or not to use -r
+--        can be no value
 function snow.mv(target, destination, recursive)
     recursive = recursive or false
+
+    if type(target) ~= 'string' then
+        error(snow.badargument(1, 'cp', 'string', type(target)), 2)
+    elseif type(destination) ~= 'string' then
+        error(snow.badargument(2, 'cp', 'string', type(destination)), 2)
+    elseif type(recursive) ~= 'boolean' then
+        error(snow.badargument(3, 'cp', 'boolean or novalue', type(recursive)), 2)
+    end
 
     if recursive then
         return os.execute(string.format('sudo mv -r %s %s', target, destination))
@@ -156,9 +250,18 @@ function snow.mv(target, destination, recursive)
 end
 
 -- remove given target
+-- @param target should be the path of the target
+-- @param recusive should be a boolean indicating wether or not to use -r
+--        can be no value
 function snow.rm(target, recursive)
     recursive = recursive or false
     
+    if type(target) ~= 'string' then
+        error(snow.badargument(1, 'cp', 'string', type(target)), 2)
+    elseif type(recursive) ~= 'boolean' then
+        error(snow.badargument(2, 'cp', 'boolean or no value', type(recursive)), 2)
+    end
+
     if recursive then
         return os.execute(string.format('sudo rm -r %s', target))
     else
@@ -167,6 +270,7 @@ function snow.rm(target, recursive)
 end
 
 -- change the current directory
+-- @param directory should be the path of the directory to change or novalue
 function snow.cd(directory)
     directory = directory or ''
     
@@ -178,64 +282,104 @@ function snow.cd(directory)
 end
 
 -- make a new directory
+-- @param directory should be the path of the directory to make
 function snow.mkdir(directory)
-    return os.execute('sudo mkdir '..directory)
-end
-
--- print with a given format
-function snow.printf(fmt, ...)
-    io.stdout:write(string.format(fmt, ...))
-    collectgarbage()
-end
-
--- scan data with a given format
-function snow.scanf(fmt)
-    local input = io.stdin:read('l')
-
-    if not tonumber(input) then
-        return string.format(fmt, input)
+    if type(directory) == 'string' then
+        return os.execute('sudo mkdir '..directory)
     else
-        return string.format(fmt, tonumber(input))
+        error(snow.badargument(1, 'mkdir', 'string', type(directory)), 2)
     end
 end
 
+-- print with a given format
+-- @param fmt should be a format string, writes to stdout
+function snow.printf(fmt, ...)
+    if type(fmt) ~= 'string' then
+        error(snow.badargument(1, 'printf', 'string', type(fmt)), 2)
+    else
+        io.stdout:write(string.format(fmt, ...))
+    end
+
+    collectgarbage()
+end
+
 -- join a table and it's subtables into a string
+-- @param tab should be a table of strings and tables of strings to join
+-- @param sep should be a separator string or no value
 function snow.join(tab, sep)
-    local output = ''
+    local output = {}
     sep = sep or ' '
 
     for _, v in pairs(tab) do
         if type(v) == 'string' then
-            output = output..v..sep
+            table.insert(output, v)
         elseif type(v) == 'table' then
             for _, v2 in pairs(v) do
-                output = string.format("%s %s ", output, snow.join(v2, sep))
+                table.insert(output, v2)
             end
+        else
+            error(v..' is not a table or string', 2)
         end
     end
 
-    return output
+    return table.concat(output, sep)
 end
 
 -- execute default c compiler with arguments
 function snow.cc(...)
-    return os.execute(string.format("cc ", snow.join({...})))
+    return os.execute(string.format("cc %s", snow.join({...})))
 end
 
 -- execute default c++ compiler with arguments
 function snow.cxx(...)
-    return os.execute(string.format("c++ ", snow.join({...})))
+    return os.execute(string.format("c++ %s", snow.join({...})))
+end
+
+-- execute gcc compiler with argumens
+
+function snow.gcc(...)
+    return os.execute(string.format("gcc %s", snow.join({...})))
+end
+
+-- execute g++ compiler with arguments 
+function snow.gxx(...) 
+    return os.execute(string.format("g++ %s", snow.join({...})))
+end
+
+snow['g++'] = snow.gxx
+
+function snow.clang(...)
+    return os.execute(string.format("clang %s", snow.join({...})))
+end
+
+-- execute fpc compiler with arguments
+function snow.fpc(...)
+    return os.execute(string.format("fpc %s", snow.join({...})))
 end
 
 -- execute default assembler with arguments
 function snow.as(...)
-    return os.execute(string.format("as ", snow.join({...})))
+    return os.execute(string.format("as %s", snow.join({...})))
 end
 
 -- execute dynamic linker with arguments
 function snow.ld(...)
-    return os.execute(string.format("ld ", snaw.join({...})))
+    return os.execute(string.format("ld %s", snaw.join({...})))
 end
+
+-- execute chmod
+function snow.chmod(mod, file)
+    return os.execute(string.format('chmod %s %s', mod, file))
+end
+
+snow.compilers = {
+    'cc',
+    'cxx',
+    'gcc',
+    'g++',
+    'clang',
+    'fpc'
+}
 
 -- execute ldconfig
 function snow.ldconfig()
@@ -259,18 +403,19 @@ function snow.build(snowtab)
         snow.printf(snow.buildfmt, snowtab.object, snowtab.platform, snowtab.architechture)
     end
 
-    if snowtab.mode == snow.multi or snowtab.submode == snow.multi then
-        for _, v in pairs(snowtab.subtabs) do
-            local ret = snow.build(v)
+    if snowtab.build and type(snowtab.build) == 'function' then
+        return snowtab:build()
+    
+    elseif snowtab.mode == 'multiple' then
+        local out = snow.Tab({ mode = 'multiple' })
 
-            if tonumber(ret) and ret ~= 0 then
-                return ret
+        for _, v in pairs(snowtab.subtabs) do
+            if v.mode == 'build' then
+                table.insert(out.subtabs, v)
             end
         end
-    end
 
-    if snowtab.build and type(snowtab.build) == 'function' then
-        snowtab:build()
+        return snow.multiple(out)
 
     elseif snowtab.compiler == 'lua' then 
         local out = loadfile(snowtab['$'])
@@ -315,15 +460,6 @@ snow.installfmt = "SnowLynx: Installing %s to %s >,..,>\n"
 -- installs a snowtab and writes the installed
 -- locations to a manifest file called .snowman
 function snow.install(snowtab)
-    if snowtab.mode == snow.multi or snowtab.submode == snow.multi then
-        for _, v in pairs(snowtab.subtabs) do
-            local ret = snow.install(v)
-
-            if tonumber(ret) and ret ~= 0 then
-                return ret
-            end
-        end
-    end
 
     local path     = snowtab.manifest or '.snowman'
     local manifest = io.open(path, 'a+')
@@ -332,6 +468,18 @@ function snow.install(snowtab)
     if snowtab.install and (type(snowtab.install) == 'function') then
         ret = snowtab:install(manifest)
         manifest:close()
+    
+    elseif snowtab.mode == 'multiple' then
+        manifest:close()
+        local out = snow.Tab({ mode = 'multiple '})
+
+        for _, v in pairs(snowtab.subtabs) do
+            if v.mode == 'install' then
+                table.insert(out.subtabs, v)
+            end
+        end
+
+        return snow.multiple(out)
 
     elseif snowtab.mode == 'bin' then
         manifest:write(snowtab.destination..'\n')
@@ -425,6 +573,17 @@ function snow.remove(snowtab)
     if snowtab.remove and type(snowtab.remove) == 'function' then
         snowtab:remove(manifest)
         manifest:close()
+    elseif snowtab.mode == 'multiple' then
+        manifest:close()
+        local out = snow.Tab({ mode = 'multiple' })
+
+        for _, v in pairs(snowtab.subtabs) do
+            if v.mode == 'remove' then
+                table.insert(out.subtabs, v)
+            end
+        end
+
+        return snow.multiple(out)
     else
         local input = manifest:read('l')
 
@@ -472,36 +631,42 @@ function snow.remove(snowtab)
     end
 end
 
+function snow.multiple(snowtab)
+    for _, v in pairs(snowtab.subtabs) do
+        local snowexec = snow[v.mode]
+
+        v.mode = v.submode
+
+        if type(snowexec) == 'function' then
+            flag, e = pcall(snowexec, v)
+            
+            if not flag then
+                error(e, 2)
+            elseif tonumber(e) and e ~= 0 then
+                return e
+            end
+        else
+            error(v.mode..' is not a valid command', 2)
+        end
+    end
+end
+
 -- iterate through command line arguments
 -- to get desired information
 function snow.loadargs()
     local i = 1
 
-    if #arg >= 1 then
-        if arg[1] == 'help' then
-            if #arg == 2 then
-                snow.help(arg[2])
-            else
-                snow.help()
-            end
-            
-            os.exit(0)
-        else
-            SNOW_MODE = arg[1]
-        end
-    end
-
-    i = i + 1
-
     while i <= #arg do
-        if arg[i] == '@' then
+
+        if i == 1 then
+            SNOW_MODE = arg[i]
+
+        elseif arg[i] == '@' then
             i = i + 1
             SNOW_TAB = arg[i]
         elseif arg[i] == '$' then
             i = i + 1
             SNOW_RC = arg[i]
-        else
-            SNOW_MODE = arg[i]
         end
         i = i + 1
     end
